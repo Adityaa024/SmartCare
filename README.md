@@ -4,11 +4,11 @@
 This project was developed in compliance with the hackathon Problem Statement. It addresses the critical issues of finding doctors, booking appointments securely under high concurrency, and centralizing medical records digitally. 
 
 ## Key Technical Implementations
-1. **Concurrency Control:** Strict backend-level concurrency protection using a composite unique constraint (`@@unique([doctorId, scheduleDate, scheduleTime])`) and Prisma's `Serializable` transaction isolation level. This completely eliminates race conditions and double-booking.
+1. **Concurrency Control:** Strict backend-level concurrency protection using a composite unique constraint (`@@unique([doctorId, scheduleDate, scheduleTime])`) and MongoDB's atomic index constraints. This completely eliminates race conditions and double-booking.
 2. **Personal Health Summary:** Patients can log their Blood Group, Medical Conditions, and Medications seamlessly during the booking flow.
 3. **Diagnosis Notes:** Doctors can securely record unstructured diagnosis notes alongside structured prescriptions.
 4. **Slot Management:** Doctors can proactively block dates/times for leaves, dynamically filtering these out of the patient's view.
-5. **Real Database Backend:** Migrated from a mock `localStorage` interface to a production-ready Node.js, Express, and PostgreSQL architecture.
+5. **Real Database Backend:** Migrated from a mock `localStorage` interface to a production-ready Node.js, Express, and MongoDB architecture.
 
 ---
 
@@ -18,7 +18,7 @@ This project was developed in compliance with the hackathon Problem Statement. I
 |-------|--------|
 | **Frontend** | React 18, Redux Toolkit, RTK Query, Ant Design, Bootstrap |
 | **Backend** | Node.js, Express.js |
-| **Database** | PostgreSQL, Prisma ORM |
+| **Database** | MongoDB, Prisma ORM |
 
 ---
 
@@ -28,7 +28,7 @@ Follow these steps to run the complete platform (Backend + Frontend) locally on 
 
 ### Prerequisites
 1. **Node.js** (v18+ recommended)
-2. **PostgreSQL** database running locally or via a cloud provider (e.g., Supabase, Neon).
+2. **MongoDB** database running via a cloud provider (e.g., MongoDB Atlas).
 
 ### 1. Database Configuration
 1. Navigate to the `api` directory:
@@ -39,9 +39,9 @@ Follow these steps to run the complete platform (Backend + Frontend) locally on 
    ```bash
    cp .env.example .env
    ```
-3. Open `.env` and set your `DATABASE_URL` to point to your PostgreSQL instance:
+3. Open `.env` and set your `DATABASE_URL` to point to your MongoDB instance:
    ```env
-   DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+   DATABASE_URL="mongodb+srv://USER:PASSWORD@CLUSTER_URL/DATABASE?retryWrites=true&w=majority"
    ```
 
 ### 2. Backend Setup
@@ -55,9 +55,9 @@ Follow these steps to run the complete platform (Backend + Frontend) locally on 
    ```
 3. Start the Express server:
    ```bash
-   npm run dev
+   npm start
    ```
-   *(The backend server will run on `http://localhost:5000` by default)*
+   *(The backend server will run on `http://localhost:5050` by default)*
 
 ### 3. Frontend Setup
 1. Open a new terminal window and navigate to the project root directory:
