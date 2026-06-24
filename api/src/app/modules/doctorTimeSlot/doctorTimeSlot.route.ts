@@ -9,6 +9,7 @@ router.get('/my-slot', auth(AuthUser.DOCTOR), doctorTimeSlotController.getMyTime
 router.get('/:id', auth(AuthUser.DOCTOR), doctorTimeSlotController.getTimeSlot);
 router.get('/appointment-time/:id', doctorTimeSlotController.getAppointmentTimeOfEachDoctor);
 router.post('/create', auth(AuthUser.DOCTOR), doctorTimeSlotController.createTimeSlot);
+router.post('/block', auth(AuthUser.DOCTOR), doctorTimeSlotController.blockTimeSlot);
 router.get('/', doctorTimeSlotController.getAllTimeSlot);
 router.patch('/', auth(AuthUser.DOCTOR), doctorTimeSlotController.updateTimeSlot);
 router.delete('/', auth(AuthUser.DOCTOR), doctorTimeSlotController.deleteTimeSlot);

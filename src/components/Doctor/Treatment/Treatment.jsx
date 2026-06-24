@@ -24,6 +24,7 @@ const Treatment = () => {
     const [selectAppointmentStatus, setSelectAppointmentStatus] = useState('');
     const [patientStatus, setPatientStatus] = useState('');
     const [daignosis, setDaignosis] = useState([]);
+    const [diagnosisNotes, setDiagnosisNotes] = useState('');
     const [disease, setDisease] = useState([]);
     const [medicalCheckup, setMedicalCheckup] = useState([]);
     const [instruction, setInstruction] = useState('');
@@ -33,7 +34,7 @@ const Treatment = () => {
     useEffect(() => {
         const isInputEmpty = !selectAppointmentStatus || !patientStatus || !instruction || !followUpDate || !daignosis.length === 0 || !disease.length === 0 || !medicalCheckup.length === 0;
         setIsDisable(isInputEmpty);
-    }, [selectAppointmentStatus, patientStatus, followUpDate, instruction, medicineList, daignosis, disease, medicalCheckup]);
+    }, [selectAppointmentStatus, patientStatus, followUpDate, instruction, medicineList, daignosis, disease, medicalCheckup, diagnosisNotes]);
 
     const [createPrescription, { isSuccess, isLoading, isError, error }] = useCreatePrescriptionMutation();
 
@@ -58,6 +59,7 @@ const Treatment = () => {
         obj.patientType = patientStatus;
 
         daignosis.length && (obj["daignosis"] = daignosis.join(','))
+        obj.diagnosisNotes = diagnosisNotes;
         disease.length && (obj["disease"] = disease.join(','))
         medicalCheckup.length && (obj["test"] = medicalCheckup.join(','))
         obj.followUpdate = followUpDate;
@@ -77,6 +79,7 @@ const Treatment = () => {
             setSelectAppointmentStatus("");
             setPatientStatus("");
             setDaignosis([]);
+            setDiagnosisNotes('');
             setDisease([]);
             setMedicalCheckup([]);
             setInstruction('');
@@ -148,6 +151,17 @@ const Treatment = () => {
                                             mode={true}
                                             options={DiseaseOptions}
                                             setSelectData={setDisease}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-md-12">
+                                    <div className="form-group mb-3 mt-2">
+                                        <label>Diagnosis Notes</label>
+                                        <TextArea 
+                                            rows={3} 
+                                            placeholder="Add detailed diagnosis notes..." 
+                                            value={diagnosisNotes}
+                                            onChange={(e) => setDiagnosisNotes(e.target.value)} 
                                         />
                                     </div>
                                 </div>

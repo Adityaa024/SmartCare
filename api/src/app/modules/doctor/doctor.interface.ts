@@ -10,4 +10,4 @@ export type IDoctorFilters = {
 export const IDoctorFiltersData = ['searchTerm','firstName','lastName','gender','city', 'max', 'min', 'specialist']
 export const IDoctorOptions = ['limit', 'page', 'sortBy', 'sortOrder']
 
-export const DoctorSearchableFields = ['firstName', 'lastName', 'address', 'specialization', 'degree']
+export const DoctorSearchableFields = ['firstName', 'lastName', 'address', 'specialization', 'degree', 'city']

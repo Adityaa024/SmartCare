@@ -34,6 +34,9 @@ const DoctorBooking = () => {
         expiredMonth: '',
         cardExpiredYear: '',
         cvv: '',
+        bloodGroup: '',
+        knownMedicalConditions: '',
+        currentMedications: '',
     }
     const {data:loggedInUser, role} = useAuthCheck();
     const [current, setCurrent] = useState(0);
@@ -46,7 +49,7 @@ const DoctorBooking = () => {
     const { doctorId } = useParams();
     const navigation = useNavigate();
     const { data, isLoading, isError, error } = useGetDoctorQuery(doctorId);
-    const { data: time, refetch, isLoading: dIsLoading, isError: dIsError, error: dError } = useGetAppointmentTimeQuery({ day: selectDay, id: doctorId });
+    const { data: time, refetch, isLoading: dIsLoading, isError: dIsError, error: dError } = useGetAppointmentTimeQuery({ day: selectDay, date: selectedDate, id: doctorId });
 
     const [selectValue, setSelectValue] = useState(initialValue);
     const [IsdDisable, setIsDisable] = useState(true);
@@ -152,6 +155,9 @@ const DoctorBooking = () => {
             scheduleTime: selectTime,
             doctorId: doctorId,
             patientId: role !== '' && role === 'patient' ? patientId : undefined,
+            bloodGroup: selectValue.bloodGroup,
+            knownMedicalConditions: selectValue.knownMedicalConditions,
+            currentMedications: selectValue.currentMedications,
         }
         obj.payment = {
             paymentType: selectValue.paymentType,

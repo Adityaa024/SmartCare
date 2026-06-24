@@ -72,6 +72,16 @@ const getAppointmentTimeOfEachDoctor = catchAsync(async (req: Request, res: Resp
     })
 })
 
+const blockTimeSlot = catchAsync(async (req: Request, res: Response) => {
+    const result = await TimeSlotService.blockTimeSlot(req.user, req.body);
+    sendResponse(res, {
+        statusCode: 200,
+        message: 'Successfully blocked Time Slot !!',
+        success: true,
+        data: result
+    })
+})
+
 
 export const doctorTimeSlotController = {
     getAllTimeSlot,
@@ -80,5 +90,6 @@ export const doctorTimeSlotController = {
     createTimeSlot,
     deleteTimeSlot,
     getMyTimeSlot,
-    getAppointmentTimeOfEachDoctor
+    getAppointmentTimeOfEachDoctor,
+    blockTimeSlot
 }

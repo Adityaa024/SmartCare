@@ -62,6 +62,22 @@ const createTimeSlot = async (user: any, payload: any): Promise<DoctorTimeSlot |
     return result;
 }
 
+const blockTimeSlot = async (user: any, payload: any): Promise<any> => {
+    const { userId } = user;
+    const isDoctor = await prisma.doctor.findUnique({ where: { id: userId } });
+    if (!isDoctor) throw new ApiError(httpStatus.NOT_FOUND, 'Doctor Account is not found !!');
+
+    const result = await prisma.blockedSlot.create({
+        data: {
+            doctorId: isDoctor.id,
+            date: new Date(payload.date),
+            time: payload.time,
+            reason: payload.reason || "Leave"
+        }
+    });
+    return result;
+}
+
 const deleteTimeSlot = async (id: string): Promise<DoctorTimeSlot | null> => {
     const result = await prisma.doctorTimeSlot.delete({
         where: {
@@ -186,6 +202,14 @@ const getAppointmentTimeOfEachDoctor = async (id: string, filter: any): Promise<
         },
     })
 
+    let blockedTimes: string[] = [];
+    if (filter.date) {
+        const blockedSlots = await prisma.blockedSlot.findMany({
+            where: { doctorId: id, date: new Date(filter.date) }
+        });
+        blockedTimes = blockedSlots.map((b: any) => b.time);
+    }
+
     const allSlots = doctorTimSlot.map((item) => {
         const { day, timeSlot, ...others } = item;
         return { day, timeSlot }
@@ -205,11 +229,14 @@ const getAppointmentTimeOfEachDoctor = async (id: string, filter: any): Promise<
                 const endDate = moment(endTime, 'hh:mm a');
 
                 while (startDate < endDate) {
-                    const selectableTime = {
-                        id: newTimeSlots.length + 1,
-                        time: startDate.format('hh:mm a')
+                    const timeString = startDate.format('hh:mm a');
+                    if (!blockedTimes.includes(timeString)) {
+                        const selectableTime = {
+                            id: newTimeSlots.length + 1,
+                            time: timeString
+                        }
+                        newTimeSlots.push({ day: day, slot: selectableTime });
                     }
-                    newTimeSlots.push({ day: day, slot: selectableTime });
                     startDate.add(interval, 'minutes');
                 }
             })
@@ -231,5 +258,6 @@ export const TimeSlotService = {
     createTimeSlot,
     deleteTimeSlot,
     getMyTimeSlot,
-    getAppointmentTimeOfEachDoctor
+    getAppointmentTimeOfEachDoctor,
+    blockTimeSlot
 }

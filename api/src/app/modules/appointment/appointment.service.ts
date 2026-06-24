@@ -1,4 +1,4 @@
-import { Appointments, Patient, Payment, paymentStatus } from "@prisma/client";
+import { Appointments, Patient, Payment, paymentStatus, Prisma } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/apiError";
 import httpStatus from "http-status";
@@ -32,30 +32,40 @@ const createAppointment = async (payload: any): Promise<Appointments | null | an
     }
     patientInfo['paymentStatus'] = paymentStatus.paid;
   
-    const result = await prisma.$transaction(async (tx) => {
-        const previousAppointment = await tx.appointments.findFirst({
-            orderBy: { createdAt: 'desc' },
-            take: 1
-        });
-        const appointmentLastNumber = (previousAppointment?.trackingId ?? '').slice(-3);
-        const lastDigit = (Number(appointmentLastNumber) + 1 || 0).toString().padStart(3, '0');
+    try {
+        const result = await prisma.$transaction(async (tx) => {
+            const previousAppointment = await tx.appointments.findFirst({
+                orderBy: { createdAt: 'desc' },
+                take: 1
+            });
+            const appointmentLastNumber = (previousAppointment?.trackingId ?? '').slice(-3);
+            const lastDigit = (Number(appointmentLastNumber) + 1 || 0).toString().padStart(3, '0');
 
-        // Trcking Id To be ==> First 3 Letter Of User  + current year + current month + current day + unique number (Matched Previous Appointment).
-        const first3DigitName = patientInfo?.firstName?.slice(0, 3).toUpperCase();
-        const year = moment().year();
-        const month = (moment().month() + 1).toString().padStart(2, '0');
-        const day = (moment().dayOfYear()).toString().padStart(2, '0');
-        const trackingId = first3DigitName + year + month + day + lastDigit || '001';
-        patientInfo['trackingId'] = trackingId;
+            // Trcking Id To be ==> First 3 Letter Of User  + current year + current month + current day + unique number (Matched Previous Appointment).
+            const first3DigitName = patientInfo?.firstName?.slice(0, 3).toUpperCase();
+            const year = moment().year();
+            const month = (moment().month() + 1).toString().padStart(2, '0');
+            const day = (moment().dayOfYear()).toString().padStart(2, '0');
+            const trackingId = first3DigitName + year + month + day + lastDigit || '001';
+            patientInfo['trackingId'] = trackingId;
 
-        const appointment = await tx.appointments.create({
-            data: patientInfo,
-            include: {
-                doctor: true,
-                patient: true
+            const { scheduleDate, scheduleTime } = patientInfo;
+            // 1. Check if the slot is marked as a "BlockedSlot" (Holiday/Leave)
+            const isBlocked = await tx.blockedSlot.findFirst({
+                where: { doctorId: patientInfo.doctorId, date: new Date(scheduleDate), time: scheduleTime }
+            });
+            if (isBlocked) {
+                throw new ApiError(httpStatus.CONFLICT, "Slot is blocked by the doctor.");
             }
-        });
-        const { paymentMethod, paymentType } = payment;
+
+            const appointment = await tx.appointments.create({
+                data: patientInfo,
+                include: {
+                    doctor: true,
+                    patient: true
+                }
+            });
+            const { paymentMethod, paymentType } = payment;
         const docFee = Number(isDoctorExist.price);
         const vat = (15 / 100) * (docFee + 10)
         if (appointment.id) {
@@ -101,8 +111,14 @@ const createAppointment = async (payload: any): Promise<Appointments | null | an
         const toMail = `${appointment.email + ',' + appointment.doctor?.email}`;
         EmailtTransporter({ pathName, replacementObj, toMail, subject })
         return appointment;
-    });
-    return result;
+        });
+        return result;
+    } catch (error: any) {
+        if (error.code === 'P2002') {
+            throw new ApiError(httpStatus.CONFLICT, "Double-booking detected. This slot was just taken. Please choose the next available slot.");
+        }
+        throw error;
+    }
 }
 
 const createAppointmentByUnAuthenticateUser = async (payload: any): Promise<Appointments | null> => {

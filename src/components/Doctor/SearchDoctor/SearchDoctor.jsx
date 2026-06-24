@@ -17,6 +17,7 @@ const SearchDoctor = () => {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [sortByGender, setSortByGender] = useState('');
 	const [specialist, setSpecialist] = useState('');
+	const [city, setCity] = useState('');
 	const [priceRange, setPriceRange] = useState({});
 
 	const query = {
@@ -26,6 +27,7 @@ const SearchDoctor = () => {
 		...(sortOrder && { sortOrder }),
 		...(sortByGender && { gender: sortByGender }),
 		...(specialist && { specialist: specialist }),
+		...(city && { city: city }),
 	};
 
 	const priceDebounced = useDebounced({ searchQuery: priceRange, delay: 600 });
@@ -47,6 +49,7 @@ const SearchDoctor = () => {
 		setSearchTerm('');
 		setSortByGender('');
 		setSpecialist('');
+		setCity('');
 		setPriceRange({});
 	};
 
@@ -104,6 +107,8 @@ const SearchDoctor = () => {
 							setSortByGender={setSortByGender}
 							specialist={specialist}
 							setSpecialist={setSpecialist}
+							city={city}
+							setCity={setCity}
 							priceRange={priceRange}
 							setPriceRange={setPriceRange}
 							sortBy={sortBy}

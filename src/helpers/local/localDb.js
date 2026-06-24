@@ -136,7 +136,7 @@ const seedDb = () => ({
       id: 'doctor-1',
       firstName: 'Amina',
       lastName: 'Rahman',
-      email: 'doctor@example.com',
+      email: 'amina.rahman@gmail.com',
       phone: '01000000001',
       specialization: 'Cardiology',
       degree: 'MBBS, MD',

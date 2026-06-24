@@ -31,6 +31,8 @@ const SearchSidebar = ({
 	sortOrder,
 	setSortBy,
 	setSortOrder,
+	city,
+	setCity,
 	resetFilter,
 	query,
 }) => {
@@ -58,6 +60,7 @@ const SearchSidebar = ({
 		searchTerm ||
 		sortByGender ||
 		specialist ||
+		city ||
 		(priceRange?.min != null && priceRange?.max != null) ||
 		sortBy;
 
@@ -94,6 +97,17 @@ const SearchSidebar = ({
 						options={genderOptions}
 						allowClear
 						className="search-sidebar__select w-100"
+					/>
+				</div>
+
+				<div className="search-sidebar__group">
+					<label>Location / City</label>
+					<Input
+						placeholder="E.g., New York, London..."
+						value={city || ''}
+						onChange={(e) => setCity(e.target.value)}
+						allowClear
+						className="search-sidebar__input w-100"
 					/>
 				</div>
 

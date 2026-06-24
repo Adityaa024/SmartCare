@@ -4,15 +4,15 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model Auth {
-  id       String   @id @default(uuid())
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
   email    String   @unique
   password String
-  userId   String?
+  userId   String?  @db.ObjectId
   role     UserRole
   /// When true (admin only): JWT marks user as demo; API blocks mutating requests (read-only).
   isDemo   Boolean  @default(false)
@@ -21,8 +21,8 @@ model Auth {
 }
 
 model UserVerfication {
-  id     String @id @default(uuid())
-  userId String
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
   uniqueString String?
   expiresAt DateTime?
 
@@ -31,8 +31,8 @@ model UserVerfication {
 }
 
 model ForgotPassword {
-  id     String @id @default(uuid())
-  userId String
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
   uniqueString String?
   expiresAt DateTime?
 
@@ -43,32 +43,34 @@ model ForgotPassword {
 }
 
 model Patient {
-  id           String         @id @default(uuid())
-  firstName    String
-  lastName     String
-  dateOfBirth  DateTime?
-  bloodGroup   String?
-  mobile       String?
-  city         String?
-  state        String?
-  zipCode      String?
-  gender       String?
-  country      String?
-  email        String         @unique
-  address      String?
-  img          String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  appointments Appointments[]
-  Reviews      Reviews[]
-  Prescription Prescription[]
-  favourites   Favourites[]
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  firstName              String
+  lastName               String
+  dateOfBirth            DateTime?
+  bloodGroup             String?
+  knownMedicalConditions String?
+  currentMedications     String?
+  mobile                 String?
+  city                   String?
+  state                  String?
+  zipCode                String?
+  gender                 String?
+  country                String?
+  email                  String         @unique
+  address                String?
+  img                    String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  appointments           Appointments[]
+  Reviews                Reviews[]
+  Prescription           Prescription[]
+  favourites             Favourites[]
 
   @@map("Patient")
 }
 
 model Doctor {
-  id                     String           @id @default(uuid())
+  id                     String           @id @default(auto()) @map("_id") @db.ObjectId
   firstName              String
   lastName               String
   email                  String           @unique
@@ -107,6 +109,7 @@ model Doctor {
   prescription           Prescription[]
   favourites             Favourites[]
   DoctorTimeSlot         DoctorTimeSlot[]
+  blockedSlots           BlockedSlot[]
   blogs                  Blogs[]
   reviews                Reviews[]
 
@@ -114,10 +117,10 @@ model Doctor {
 }
 
 model Appointments {
-  id        String   @id @default(uuid())
-  patientId String?
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId String?  @db.ObjectId
   patient   Patient? @relation(fields: [patientId], references: [id])
-  doctorId  String?
+  doctorId  String?  @db.ObjectId
   doctor    Doctor?  @relation(fields: [doctorId], references: [id])
 
   trackingId         String?             @unique
@@ -141,12 +144,13 @@ model Appointments {
   prescription Prescription[]
   payment      Payment[]
 
+  @@unique([doctorId, scheduleDate, scheduleTime])
   @@map("Appointments")
 }
 
 model Payment {
-  id            String       @id @default(uuid())
-  appointmentId String
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  appointmentId String       @db.ObjectId
   appointment   Appointments @relation(fields: [appointmentId], references: [id])
   paymentMethod String
   paymentType   String
@@ -160,12 +164,12 @@ model Payment {
 }
 
 model Reviews {
-  id String @id @default(uuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  doctorId String
+  doctorId String  @db.ObjectId
   doctor   Doctor? @relation(fields: [doctorId], references: [id])
 
-  patientId String
+  patientId String  @db.ObjectId
   patient   Patient @relation(fields: [patientId], references: [id])
 
   description   String?
@@ -180,22 +184,23 @@ model Reviews {
 }
 
 model Prescription {
-  id String @id @default(uuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  doctorId String
+  doctorId String @db.ObjectId
   doctor   Doctor @relation(fields: [doctorId], references: [id])
 
-  patientId String
+  patientId String  @db.ObjectId
   patient   Patient @relation(fields: [patientId], references: [id])
 
-  appointmentId String
+  appointmentId String       @db.ObjectId
   appointment   Appointments @relation(fields: [appointmentId], references: [id])
 
-  followUpdate String?
-  instruction  String?
-  isFullfilled Boolean @default(false)
-  isArchived   Boolean @default(false)
-  daignosis    String?
+  followUpdate   String?
+  instruction    String?
+  isFullfilled   Boolean    @default(false)
+  isArchived     Boolean    @default(false)
+  daignosis      String?
+  diagnosisNotes String?
 
   disease String
   test    String?
@@ -209,8 +214,8 @@ model Prescription {
 }
 
 model Medicine {
-  id             String       @id @default(uuid())
-  prescriptionId String
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  prescriptionId String       @db.ObjectId
   prescription   Prescription @relation(fields: [prescriptionId], references: [id])
 
   medicine  String?
@@ -225,19 +230,19 @@ model Medicine {
 }
 
 model Favourites {
-  id        String   @id @default(uuid())
-  doctorId  String   @unique
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId  String   @unique @db.ObjectId
   doctor    Doctor   @relation(fields: [doctorId], references: [id])
   patient   Patient? @relation(fields: [patientId], references: [id])
-  patientId String?
+  patientId String?  @db.ObjectId
 
   @@map("Favourites")
 }
 
 model DoctorTimeSlot {
-  id String @id @default(uuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  doctorId       String
+  doctorId       String        @db.ObjectId
   doctor         Doctor        @relation(fields: [doctorId], references: [id])
   day            Day?
   timeSlot       ScheduleDay[]
@@ -249,20 +254,33 @@ model DoctorTimeSlot {
   @@map("DoctorTimeSlot")
 }
 
+model BlockedSlot {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId  String   @db.ObjectId
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  date      DateTime
+  time      String
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("BlockedSlot")
+}
+
 model ScheduleDay {
-  id               Int             @id @default(autoincrement())
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
   startTime        String
   endTime          String
   doctorTimeSlot   DoctorTimeSlot? @relation(fields: [doctorTimeSlotId], references: [id])
-  doctorTimeSlotId String?
+  doctorTimeSlotId String?         @db.ObjectId
 }
 
 model Blogs {
-  id          String   @id @default(uuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
   img         String?
-  userId      String
+  userId      String   @db.ObjectId
   user        Doctor   @relation(fields: [userId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

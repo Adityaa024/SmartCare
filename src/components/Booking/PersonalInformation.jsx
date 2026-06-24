@@ -7,7 +7,7 @@ import '../../components/Appointment/AppointmentFlow.css';
 const { TextArea } = Input;
 
 const PersonalInformation = ({ handleChange, selectValue, setPatientId = () => {} }) => {
-  const { firstName, lastName, email, phone, reasonForVisit, description, address, problemType } = selectValue;
+const { firstName, lastName, email, phone, reasonForVisit, description, address, problemType, bloodGroup, knownMedicalConditions, currentMedications } = selectValue;
   const [checked, setChecked] = useState(false);
   const { data } = useAuthCheck();
 
@@ -90,6 +90,55 @@ const PersonalInformation = ({ handleChange, selectValue, setPatientId = () => {
               placeholder="Street, city, state, ZIP"
               name="address"
               value={address || ''}
+              onChange={(e) => handleChange(e)}
+              size="large"
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="patient-form-card" size="small">
+        <p className="patient-form-card__title">Personal Health Summary</p>
+        <div className="row g-3">
+          <div className="col-md-4">
+            <label className="form-label">Blood Group</label>
+            <Select
+              placeholder="Select Blood Group"
+              options={[
+                { value: 'A+', label: 'A+' },
+                { value: 'A-', label: 'A-' },
+                { value: 'B+', label: 'B+' },
+                { value: 'B-', label: 'B-' },
+                { value: 'AB+', label: 'AB+' },
+                { value: 'AB-', label: 'AB-' },
+                { value: 'O+', label: 'O+' },
+                { value: 'O-', label: 'O-' },
+              ]}
+              value={bloodGroup || undefined}
+              onChange={(value) => onFieldChange('bloodGroup', value)}
+              allowClear
+              style={{ width: '100%' }}
+              size="large"
+            />
+          </div>
+          <div className="col-md-12">
+            <label className="form-label">Known Medical Conditions</label>
+            <TextArea
+              rows={2}
+              placeholder="E.g., Diabetes, Hypertension, Asthma (Leave blank if none)"
+              name="knownMedicalConditions"
+              value={knownMedicalConditions || ''}
+              onChange={(e) => handleChange(e)}
+              size="large"
+            />
+          </div>
+          <div className="col-md-12">
+            <label className="form-label">Current Medications</label>
+            <TextArea
+              rows={2}
+              placeholder="List any medications you are currently taking"
+              name="currentMedications"
+              value={currentMedications || ''}
               onChange={(e) => handleChange(e)}
               size="large"
             />
