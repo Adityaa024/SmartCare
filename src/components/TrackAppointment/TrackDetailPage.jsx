@@ -24,10 +24,10 @@ const statusTagColor = (status) => {
 };
 
 const TrackDetailPage = ({ data, setShowInfo }) => {
-	const patientFirst = data?.patient?.firstName || data?.firstName || '';
-	const patientLast = data?.patient?.lastName || data?.lastName || '';
+	const patientFirst = data?.firstName || data?.patient?.firstName || '';
+	const patientLast = data?.lastName || data?.patient?.lastName || '';
 	const patientName = `${patientFirst} ${patientLast}`.trim() || 'Patient';
-	const patientAddr = joinParts([
+	const patientAddr = data?.address || joinParts([
 		data?.patient?.address,
 		data?.patient?.city,
 		data?.patient?.state,
@@ -88,7 +88,7 @@ const TrackDetailPage = ({ data, setShowInfo }) => {
 								<div className="track-detail-person__name">{patientName}</div>
 								{patientAddr ? <p className="track-detail-person__meta">{patientAddr}</p> : null}
 								{(data?.email || data?.patient?.email) && (
-									<p className="track-detail-person__meta mb-0">{data?.patient?.email || data?.email}</p>
+									<p className="track-detail-person__meta mb-0">{data?.email || data?.patient?.email}</p>
 								)}
 							</div>
 						</div>

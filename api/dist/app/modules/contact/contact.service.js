@@ -24,7 +24,7 @@ const contactUs = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const mailOptions = {
             from: `"${firstName + ' ' + lastName}" <${email}>`,
-            to: 'adityaraj+doctor@gmail.com',
+            to: 'pujagupta+doctor@gmail.com',
             subject: subject,
             text: text
         };
